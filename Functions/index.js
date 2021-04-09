@@ -13,15 +13,16 @@ require('dotenv').config({path: process.cwd() + '/.env'});
 
 // '/' Route
 const mainHandler = (req, res) => {
-  const {user} = req;
-  User.find({}, (error, users) => {
-    if (error) {
-      res.status(400).json({message: 'Hello 🙂', error});
-    } else {
-      let Obj = [...users, user];
-      res.status(200).json(Obj);
-    }
-  });
+  // const {user} = req;
+  // User.find({}, (error, users) => {
+  //   if (error) {
+  //     res.status(400).json({message: 'Hello 🙂', error});
+  //   } else {
+  //     let Obj = [...users, user];
+  //     res.status(200).json(Obj);
+  //   }
+  // });
+  res.status(200).json({message: 'Hello, Welcome'});
 };
 // '/signup'
 const signUpHandler = (req, res) => {

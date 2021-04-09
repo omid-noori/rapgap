@@ -11,7 +11,7 @@ const {
   multerUpload,
 } = require('../Functions/index');
 
-router.get('/', checkTokenSetUser, mainHandler);
+router.get('/', mainHandler);
 
 router.post('/signup', signUpHandler);
 
