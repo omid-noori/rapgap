@@ -10,7 +10,6 @@ const app = express();
 // Middlewears
 app.use(
   cors({
-    origin: ['http://localhost:8080', 'http://192.168.52.101:8080'],
     credentials: true,
   })
 );
