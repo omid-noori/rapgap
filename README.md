@@ -5,15 +5,15 @@ Website have three roles and by signing up users get a "User" Role. User role ca
 
 ## Dependencies used in this project
 
-[1. Express](##express)
-[2. Mongoose](##mongoose)
-[3. Aws-sdk](##aws-sdk)
-[4. Multer](##multer)
-[5. Bcryptjs](##bcryptjs)
-[6. Jsonwebtoken](##jsonwebtoken)
-[7. Cors](##cors)
-[8. Dotenv](##dotenv)
-[9. Uuid](##uuid)
+[1. Express](#express)
+[2. Mongoose](#mongoose)
+[3. Aws-sdk](#aws-sdk)
+[4. Multer](#multer)
+[5. Bcryptjs](#bcryptjs)
+[6. Jsonwebtoken](#jsonwebtoken)
+[7. Cors](#cors)
+[8. Dotenv](#dotenv)
+[9. Uuid](#uuid)
 
 # Dependencies description
 
