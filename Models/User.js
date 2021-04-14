@@ -38,7 +38,7 @@ const UserSchema = new Schema(
       default: 'User',
     },
     contacts: {
-      type: Array,
+      type: Object,
     },
     description: {
       type: String,

@@ -13,15 +13,6 @@ require('dotenv').config({path: process.cwd() + '/.env'});
 
 // '/' Route
 const mainHandler = (req, res) => {
-  // const {user} = req;
-  // User.find({}, (error, users) => {
-  //   if (error) {
-  //     res.status(400).json({message: 'Hello 🙂', error});
-  //   } else {
-  //     let Obj = [...users, user];
-  //     res.status(200).json(Obj);
-  //   }
-  // });
   res.status(200).json({message: 'Hello, Welcome'});
 };
 // '/signup'
@@ -265,30 +256,34 @@ const deletePost = (req, res) => {
     if (error) {
       res.status(404).json({message: 'Post Not Found'});
     } else {
-      const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: {
-          Objects: [
-            {
-              Key: result.cover.Key,
-            },
-            {
-              Key: result.music.Key,
-            },
-          ],
-          Quiet: false,
-        },
-      };
-      s3.deleteObjects(params, (err, data) => {
-        if (err) {
-          res.status(400).json('Could not delete files!');
-        } else {
-          if (data) {
-            result.remove();
-            res.status(200).json({message: 'Successfully deleted', data});
+      if (result.uploadedBy == req.user._id) {
+        const params = {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Delete: {
+            Objects: [
+              {
+                Key: result.cover.Key,
+              },
+              {
+                Key: result.music.Key,
+              },
+            ],
+            Quiet: false,
+          },
+        };
+        s3.deleteObjects(params, (err, data) => {
+          if (err) {
+            res.status(400).json('Could not delete files!');
+          } else {
+            if (data) {
+              result.remove();
+              res.status(200).json({message: 'Successfully deleted', data});
+            }
           }
-        }
-      });
+        });
+      } else {
+        res.status(401).json({message: 'Unauthorized!'});
+      }
     }
   });
 };
@@ -362,22 +357,27 @@ const UserPosts = (req, res) => {
 };
 
 const updatePost = (req, res) => {
-  console.log(req.user._id);
-  console.log(req.params.post_id);
-  console.log(req.body);
+  console.log('USER_ID', req.user._id);
+  console.log('PARAMS_POST_ID', req.params.post_id);
+  console.log('BODY', req.body);
   Music.findOneAndUpdate(
     {_id: req.params.post_id},
-    {public: req.body.public},
-    {new: true, useFindAndModify: false},
+    req.body,
+    {new: true, useFindAndModify: true},
     (e, data) => {
       if (e) {
         res.status(404).json({message: 'Not Found!'});
       } else {
-        console.log(data.uploadedBy, req.user._id);
+        // console.log(data.uploadedBy, req.user._id);
         res.json(data);
       }
     }
   );
+};
+
+const profileUpload = (req, res) => {
+  console.log(req.body);
+  res.status(200).json({message: 'All Well!'});
 };
 
 module.exports = {
@@ -392,4 +392,5 @@ module.exports = {
   profilePic,
   UserPosts,
   updatePost,
+  profileUpload,
 };

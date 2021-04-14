@@ -18,7 +18,7 @@ router.get('/media/:fileKey', getFile);
 
 router.post('/', checkTokenSetUser, multerUpload.array('data', 2), Uploads);
 
-router.delete('/delete/:postId', deletePost);
+router.delete('/delete/:postId', checkTokenSetUser, deletePost);
 
 router.put('/update/:post_id', checkTokenSetUser, updatePost);
 
