@@ -2,7 +2,7 @@
 const User = require('../Models/User');
 const Login = require('../Models/Login');
 const Music = require('../Models/music');
-
+const Message = require('../Models/message');
 // Packages
 const bcrypt = require('bcryptjs');
 const Jwt = require('jsonwebtoken');
@@ -38,9 +38,7 @@ const signUpHandler = (req, res) => {
             if (error) {
               res.status(500).json({message: 'Something went wrong! 😐'});
             } else {
-              res
-                .status(201)
-                .json({message: 'User have been created!', savedUser});
+              res.status(201).json({message: 'User have been created!'});
             }
           });
         }
@@ -50,18 +48,12 @@ const signUpHandler = (req, res) => {
 };
 
 const createTokenSendResponse = (User, res) => {
-  let {_id, userName, role, firstName, lastName, email} = User;
-  let profilePicKey;
-  if (User.profilePic) {
-    profilePicKey = User.profilePic.Key;
-  } else {
-    profilePicKey = false;
-  }
+  let {_id, userName, role} = User;
   Jwt.sign(
     {_id, userName, role},
     process.env.ACCESS_TOKEN,
     {
-      expiresIn: '1h',
+      expiresIn: '24h',
     },
     (error, token) => {
       if (error) {
@@ -69,28 +61,8 @@ const createTokenSendResponse = (User, res) => {
           .status(500)
           .json({message: 'Server could not create Token. ', error});
       } else {
-        if (profilePicKey) {
-          res.status(200).json({
-            _id,
-            email,
-            userName,
-            role,
-            firstName,
-            lastName,
-            profilePicKey,
-            token,
-          });
-        } else {
-          res.status(200).json({
-            _id,
-            email,
-            userName,
-            role,
-            firstName,
-            lastName,
-            token,
-          });
-        }
+        User.password = undefined;
+        res.status(200).json({User, token});
       }
     }
   );
@@ -243,6 +215,7 @@ const getFile = async (req, res) => {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: req.params.fileKey,
     };
+    // res.status(206);
     await s3.getObject(params).createReadStream().pipe(res);
   } catch (error) {
     console.log(error);
@@ -377,7 +350,53 @@ const updatePost = (req, res) => {
 
 const profileUpload = (req, res) => {
   console.log(req.body);
-  res.status(200).json({message: 'All Well!'});
+  User.findOneAndUpdate(
+    {_id: req.user._id},
+    req.body,
+    {
+      new: true,
+      useFindAndModify: true,
+    },
+    (error, data) => {
+      if (error) {
+        res.status(400).json({message: 'Not Found!'});
+      } else {
+        data.password = undefined;
+        res.status(200).json(data);
+      }
+    }
+  );
+};
+
+const About = (req, res) => {
+  User.findById('6039457ffbaa7e050c951a24', (error, data) => {
+    if (error) {
+      res.status(400).json({message: 'Something went wrong!'});
+    } else {
+      data.password = undefined;
+      data.profilePic = data.profilePic.Key;
+      res.status(200).json(data);
+    }
+  });
+};
+
+const messages = (req, res) => {
+  console.log(req.body);
+  // res.status(200).json('Hell Done!');
+  const newMessage = new Message(req.body);
+  newMessage.validate((error) => {
+    if (error) {
+      res.status(400).json({message: 'Something went wrong'});
+    } else {
+      newMessage.save((error, savedMessage) => {
+        if (error) {
+          res.status(400).json({message: 'Something went wrong'});
+        } else {
+          res.status(200).json(savedMessage);
+        }
+      });
+    }
+  });
 };
 
 module.exports = {
@@ -393,4 +412,6 @@ module.exports = {
   UserPosts,
   updatePost,
   profileUpload,
+  About,
+  messages,
 };

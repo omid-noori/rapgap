@@ -10,6 +10,8 @@ const {
   profilePic,
   multerUpload,
   profileUpload,
+  About,
+  messages,
 } = require('../Functions/index');
 
 router.get('/', mainHandler);
@@ -25,5 +27,8 @@ router.post(
   profilePic
 );
 router.post('/profile', checkTokenSetUser, profileUpload);
+
+router.get('/about', About);
+router.post('/messages', messages);
 
 module.exports = router;
