@@ -11,7 +11,6 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: 'https://omid-noori.github.io/',
   })
 );
 app.use(express.json());
