@@ -9,6 +9,8 @@ const Jwt = require('jsonwebtoken');
 const multer = require('multer');
 const AWS = require('aws-sdk');
 const uuid = require('uuid');
+const paypal = require('paypal-rest-sdk');
+const path = require('path');
 require('dotenv').config({path: process.cwd() + '/.env'});
 
 // '/' Route
@@ -399,6 +401,86 @@ const messages = (req, res) => {
   });
 };
 
+let total;
+
+const Pay = (req, res) => {
+  paypal.configure({
+    mode: 'sandbox', //sandbox or live
+    client_id: process.env.PAYPAL_CLIENT_ID,
+    client_secret: process.env.PAYPAL_CLIENT_SECRET,
+  });
+  total = req.body.price;
+  const create_payment_json = {
+    intent: 'sale',
+    payer: {
+      payment_method: 'paypal',
+    },
+    redirect_urls: {
+      return_url: `${process.env.DOMAIN}/paySuccess`,
+      cancel_url: `${process.env.DOMAIN}/payCancel`,
+    },
+    transactions: [
+      {
+        item_list: {
+          items: [
+            {
+              name: 'Donation',
+              sku: 'Donate',
+              price: req.body.price,
+              currency: 'SEK',
+              quantity: 1,
+            },
+          ],
+        },
+        amount: {
+          currency: 'SEK',
+          total: req.body.price,
+        },
+        description: 'This is the payment description.',
+      },
+    ],
+  };
+  paypal.payment.create(create_payment_json, (error, payment) => {
+    if (error) {
+      throw error;
+    } else {
+      console.log('Create Payment Response');
+      console.log(payment);
+      payment.links.forEach((link) => {
+        if (link.rel === 'approval_url') {
+          res.status(200).json({approval_url: link.href});
+        }
+      });
+    }
+  });
+};
+const paySuccess = (req, res) => {
+  const payerId = req.query.PayerID;
+  const paymentId = req.query.paymentId;
+
+  const execute_payment_json = {
+    payer_id: payerId,
+    transactions: [
+      {
+        amount: {
+          currency: 'SEK',
+          total: total,
+        },
+      },
+    ],
+  };
+  paypal.payment.execute(paymentId, execute_payment_json, (error, payment) => {
+    if (error) {
+      res.status(400).json({message: 'Something went wrong!'});
+    } else {
+      console.log(payment);
+      res.sendFile(path.join(__dirname, 'Views/index.html'));
+    }
+  });
+};
+const payCancel = (req, res) => {
+  res.status(400).json({message: 'Payment Canceled!'});
+};
 module.exports = {
   mainHandler,
   signUpHandler,
@@ -414,4 +496,7 @@ module.exports = {
   profileUpload,
   About,
   messages,
+  Pay,
+  paySuccess,
+  payCancel,
 };

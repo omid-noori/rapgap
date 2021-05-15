@@ -12,6 +12,9 @@ const {
   profileUpload,
   About,
   messages,
+  Pay,
+  paySuccess,
+  payCancel,
 } = require('../Functions/index');
 
 router.get('/', mainHandler);
@@ -30,5 +33,9 @@ router.post('/profile', checkTokenSetUser, profileUpload);
 
 router.get('/about', About);
 router.post('/messages', messages);
+
+router.post('/pay', Pay);
+router.get('/paySuccess', paySuccess);
+router.get('/payCancel', payCancel);
 
 module.exports = router;

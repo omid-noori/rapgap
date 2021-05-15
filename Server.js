@@ -11,7 +11,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    // origin: ['http://localhost:8080/', 'http://192.168.52.101:8080/'],
+    origin: 'https://omid-noori.github.io/',
   })
 );
 app.use(express.json());
